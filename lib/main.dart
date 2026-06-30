@@ -11,31 +11,38 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Form Login',
+      title: 'Tugas 4 Navigasi',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const FormLoginScreen(),
+      // 1. Menggunakan Named Routes
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const LoginPage(),
+        '/dashboard': (context) => const DashboardPage(),
+      },
     );
   }
 }
 
-class FormLoginScreen extends StatefulWidget {
-  const FormLoginScreen({super.key});
+// 2. Halaman Login menggunakan StatefulWidget
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<FormLoginScreen> createState() => _FormLoginScreenState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _FormLoginScreenState extends State<FormLoginScreen> {
-  final TextEditingController _emailController = TextEditingController();
+class _LoginPageState extends State<LoginPage> {
+  // Controller untuk mengambil teks dari TextField
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Form Login Sederhana'),
+        title: const Text('Login Page'),
         backgroundColor: Colors.blueAccent,
       ),
       body: Padding(
@@ -43,26 +50,18 @@ class _FormLoginScreenState extends State<FormLoginScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Selamat Datang',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 30),
-
             TextField(
-              controller: _emailController,
+              controller: _usernameController,
               decoration: const InputDecoration(
-                labelText: 'Email',
+                labelText: 'Username',
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.email),
+                prefixIcon: Icon(Icons.person),
               ),
-              keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 20),
-
             TextField(
               controller: _passwordController,
-              obscureText: true, // Menyembunyikan teks password
+              obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'Password',
                 border: OutlineInputBorder(),
@@ -70,7 +69,6 @@ class _FormLoginScreenState extends State<FormLoginScreen> {
               ),
             ),
             const SizedBox(height: 30),
-
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -80,9 +78,15 @@ class _FormLoginScreenState extends State<FormLoginScreen> {
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () {
-                  // Aksi saat tombol ditekan
-                  print('Email: ${_emailController.text}');
-                  print('Password: ${_passwordController.text}');
+                  // 3. Mengirim data ke Dashboard lewat Named Route (arguments)
+                  Navigator.pushNamed(
+                    context,
+                    '/dashboard',
+                    arguments: {
+                      'username': _usernameController.text,
+                      'password': _passwordController.text,
+                    },
+                  );
                 },
                 child: const Text(
                   'LOGIN',
@@ -90,6 +94,62 @@ class _FormLoginScreenState extends State<FormLoginScreen> {
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Halaman Dashboard (StatelessWidget)
+class DashboardPage extends StatelessWidget {
+  const DashboardPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // 4. Menerima data yang dikirim dari halaman Login
+    final Map<String, String> args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+    
+    final username = args['username'];
+    final password = args['password'];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+        backgroundColor: Colors.green,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Selamat Datang!',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            // Menampilkan data username dan password
+            Text(
+              'Username Anda : $username',
+              style: const TextStyle(fontSize: 18),
+            ),
+            Text(
+              'Password Anda : $password',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.logout),
+              label: const Text('LOGOUT / KEMBALI'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                // 5. Menggunakan Navigator.pop untuk membuang halaman dari stack (Kembali)
+                Navigator.pop(context);
+              },
+            )
           ],
         ),
       ),
